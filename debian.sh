@@ -50,3 +50,4 @@ echo "Gunakan MySQL dengan perintah: mysql -u root -p"
 echo "SSH root login sudah diaktifkan!"
 echo "Silakan keluar dan login ulang untuk melihat watermark."
 echo "====================================="
+
