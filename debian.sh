@@ -68,6 +68,14 @@ sed -i "s/database_name_here/$wp_db/" /var/www/html/wordpress/wp-config.php
 sed -i "s/username_here/$db_user/" /var/www/html/wordpress/wp-config.php
 sed -i "s/password_here/$db_pass/" /var/www/html/wordpress/wp-config.php
 
+# Setel bahasa Indonesia pada wp-config.php
+echo "Menetapkan bahasa Indonesia di wp-config.php..."
+sed -i "s/define('WPLANG', '');/define('WPLANG', 'id_ID');/" /var/www/html/wordpress/wp-config.php
+
+# Tambahkan watermark dengan nama Yudha
+echo "Menambahkan watermark dengan nama Yudha..."
+echo "# Watermark: Yudha" >> /var/www/html/wordpress/wp-config.php
+
 # Restart Apache2 untuk menerapkan konfigurasi
 echo "Merestart Apache2..."
 systemctl restart apache2
@@ -78,9 +86,9 @@ echo "Akses phpMyAdmin di http://<your_server_ip>/phpmyadmin"
 echo "Akses WordPress di http://<your_server_ip>/wordpress"
 echo "Gantilah <your_server_ip> dengan alamat IP server Anda."
 echo ""
-echo "Terima kasih telah menggunakan script ini!"
+echo "Terima kasih telah menggunakan script ini, Yudha!"
 echo "Nama pengguna MariaDB: $db_user"
 echo "Password MariaDB: $db_pass"
 echo "Nama database WordPress: $wp_db"
 echo ""
-echo "Watermark: makan"
+echo "Watermark: Yudha"
