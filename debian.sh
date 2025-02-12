@@ -26,7 +26,7 @@ echo
 # Install paket yang diperlukan (Apache2, MariaDB, PHP, PHPMyAdmin, SSH, dll)
 echo "[1] Installing essential packages..."
 apt update && apt upgrade -y
-apt install -y wget curl git unzip htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server openssh-sftp-server
+apt install -y wget curl git unzip htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server ufw
 
 # Setting SSH agar bisa login sebagai root
 echo "[2] Configuring SSH to allow root login..."
@@ -37,6 +37,7 @@ systemctl restart ssh
 # Aktifkan firewall untuk keamanan
 echo "[3] Configuring UFW firewall..."
 ufw allow OpenSSH
+ufw allow 80,443/tcp
 ufw enable
 ufw status
 
@@ -67,6 +68,11 @@ sed -i "s/database_name_here/dbwordpress/" /var/www/html/wordpress/wp-config.php
 sed -i "s/username_here/$WP_USER/" /var/www/html/wordpress/wp-config.php
 sed -i "s/password_here/$WP_PASSWORD/" /var/www/html/wordpress/wp-config.php
 sed -i "s/localhost/localhost/" /var/www/html/wordpress/wp-config.php
+
+# Konfigurasi phpMyAdmin
+echo "[8] Configuring phpMyAdmin..."
+ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-enabled/phpmyadmin.conf
+systemctl reload apache2
 
 # Menampilkan informasi akhir
 echo "============================"
