@@ -14,22 +14,19 @@ echo "============================"
 export DEBIAN_FRONTEND=noninteractive
 
 # Meminta pengguna memasukkan password root MySQL dan password WordPress
-echo -n "Masukkan password root MySQL: "
-read -s MYSQL_ROOT_PASSWORD
+read -sp "Masukkan password root MySQL: " MYSQL_ROOT_PASSWORD
 echo
-echo -n "Masukkan password untuk user WordPress: "
-read -s WP_PASSWORD
+read -sp "Masukkan password untuk user WordPress: " WP_PASSWORD
 echo
 
 # Meminta pengguna memasukkan username untuk WordPress
-echo -n "Masukkan username untuk user WordPress: "
-read WP_USER
+read -p "Masukkan username untuk user WordPress: " WP_USER
 echo
 
-# Install paket yang diperlukan
+# Install paket yang diperlukan (Apache2, MariaDB, PHP, PHPMyAdmin, SSH, dll)
 echo "[1] Installing essential packages..."
 apt update && apt upgrade -y
-apt install -y wget curl git unzip sudo ufw htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml openssh-server openssh-sftp-server
+apt install -y wget curl git unzip sudo ufw htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server openssh-sftp-server
 
 # Setting SSH agar bisa login sebagai root
 echo "[2] Configuring SSH to allow root login..."
@@ -37,25 +34,39 @@ sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd
 sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 systemctl restart ssh
 
+# Aktifkan firewall untuk keamanan
+echo "[3] Configuring UFW firewall..."
+ufw allow OpenSSH
+ufw enable
+ufw status
+
 # Download dan ekstrak WordPress
-echo "[3] Downloading and extracting WordPress..."
+echo "[4] Downloading and extracting WordPress..."
 wget http://172.16.90.2/unduh/wordpress.zip -P /tmp/
 unzip /tmp/wordpress.zip -d /var/www/html/
 rm /tmp/wordpress.zip
 
 # Ubah hak akses direktori WordPress
-echo "[4] Setting permissions for WordPress..."
+echo "[5] Setting permissions for WordPress..."
 chmod -R 777 /var/www/html/wordpress
 chown -R www-data:www-data /var/www/html/wordpress
 
 # Konfigurasi MariaDB (mengatur password root MySQL dan membuat database WordPress)
-echo "[5] Configuring MariaDB..."
+echo "[6] Configuring MariaDB..."
 mysql -u root -p$MYSQL_ROOT_PASSWORD <<EOF
 CREATE DATABASE dbwordpress;
 CREATE USER '$WP_USER'@'localhost' IDENTIFIED BY '$WP_PASSWORD';
 GRANT ALL PRIVILEGES ON dbwordpress.* TO '$WP_USER'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
+
+# Konfigurasi WordPress (wp-config.php)
+echo "[7] Configuring WordPress..."
+cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
+sed -i "s/database_name_here/dbwordpress/" /var/www/html/wordpress/wp-config.php
+sed -i "s/username_here/$WP_USER/" /var/www/html/wordpress/wp-config.php
+sed -i "s/password_here/$WP_PASSWORD/" /var/www/html/wordpress/wp-config.php
+sed -i "s/localhost/localhost/" /var/www/html/wordpress/wp-config.php
 
 # Menampilkan informasi akhir
 echo "============================"
