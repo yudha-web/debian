@@ -25,9 +25,20 @@ mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';"
 mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$db_user'@'localhost' WITH GRANT OPTION;"
 mysql -e "FLUSH PRIVILEGES;"
 
-# Buat symbolic link untuk phpMyAdmin
-echo "Mengonfigurasi phpMyAdmin..."
+# Konfigurasi phpMyAdmin (menyiapkan file konfigurasi untuk Apache2)
+echo "Mengonfigurasi phpMyAdmin di Apache2..."
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+
+# Mengonfigurasi file config.inc.php untuk phpMyAdmin
+echo "Mengonfigurasi file phpMyAdmin config.inc.php..."
+cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
+
+# Menambahkan pengaturan database otomatis pada file config.inc.php
+echo "\$cfg['Servers'][\$i]['auth_type'] = 'config';" >> /usr/share/phpmyadmin/config.inc.php
+echo "\$cfg['Servers'][\$i]['user'] = '$db_user';" >> /usr/share/phpmyadmin/config.inc.php
+echo "\$cfg['Servers'][\$i]['password'] = '$db_pass';" >> /usr/share/phpmyadmin/config.inc.php
+echo "\$cfg['Servers'][\$i]['host'] = 'localhost';" >> /usr/share/phpmyadmin/config.inc.php
+echo "\$cfg['Servers'][\$i]['AllowNoPassword'] = FALSE;" >> /usr/share/phpmyadmin/config.inc.php
 
 # Restart Apache2 untuk menerapkan konfigurasi
 echo "Merestart Apache2..."
