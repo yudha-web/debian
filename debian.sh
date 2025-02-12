@@ -23,6 +23,47 @@ echo
 read -p "Masukkan username untuk user WordPress: " WP_USER
 echo
 
+# ========================
+# Mengatur Waktu dan Zona Waktu
+# ========================
+
+echo "[1] Mengatur waktu dan zona waktu..."
+
+# Setel zona waktu ke Asia/Jakarta (ubah sesuai dengan lokasi)
+timedatectl set-timezone Asia/Jakarta
+
+# Aktifkan NTP untuk sinkronisasi waktu otomatis
+timedatectl set-ntp true
+
+# Verifikasi perubahan zona waktu dan status NTP
+timedatectl
+
+# Cek apakah waktu sudah sinkron
+echo "[2] Memeriksa status NTP..."
+systemctl status systemd-timesyncd
+
+# Jika NTP tidak aktif, install dan aktifkan ntp
+if ! systemctl is-active --quiet systemd-timesyncd; then
+    echo "[3] Mengaktifkan layanan NTP..."
+    apt update
+    apt install -y ntp
+    systemctl enable ntp
+    systemctl start ntp
+fi
+
+# Tampilkan waktu sistem yang telah disinkronkan
+echo "[4] Waktu sistem saat ini:"
+date
+
+# ========================
+# Lanjutkan dengan instalasi paket-paket
+# ========================
+
+echo "[5] Instalasi paket-paket yang diperlukan..."
+apt update && apt upgrade -y
+apt install -y wget curl git unzip htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server ufw
+
+
 # Install paket yang diperlukan (Apache2, MariaDB, PHP, PHPMyAdmin, SSH, dll)
 echo "[1] Installing essential packages..."
 apt update && apt upgrade -y
