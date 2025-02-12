@@ -26,7 +26,7 @@ echo
 # Install paket yang diperlukan (Apache2, MariaDB, PHP, PHPMyAdmin, SSH, dll)
 echo "[1] Installing essential packages..."
 apt update && apt upgrade -y
-apt install -y wget curl git unzip sudo ufw htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server openssh-sftp-server
+apt install -y wget curl git unzip htop net-tools apache2 mariadb-server php php-mysql php-cli php-mbstring php-curl php-xml phpmyadmin openssh-server openssh-sftp-server
 
 # Setting SSH agar bisa login sebagai root
 echo "[2] Configuring SSH to allow root login..."
