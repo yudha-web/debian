@@ -4,14 +4,18 @@ Warna teks
 
 GREEN="\e[32m" YELLOW="\e[33m" CYAN="\e[36m" RESET="\e[0m"
 
+Memeriksa dan menginstal pv untuk progress bar
+
+if ! command -v pv &> /dev/null; then echo -e "${YELLOW}Menginstal pv untuk progress bar...${RESET}" apt install -y pv fi
+
 Memperbarui sistem
 
-echo -e "${YELLOW}Memperbarui sistem...${RESET}" apt update -y && apt upgrade -y
+echo -e "${YELLOW}Memperbarui sistem...${RESET}" apt update -y | pv -lep -s 100 > /dev/null apt upgrade -y | pv -lep -s 100 > /dev/null
 
 Menginstal paket yang diperlukan
 
-echo -e "${YELLOW}Menginstal Apache2, PHP, MariaDB, phpMyAdmin, SSH, dan WordPress...${RESET}" apt install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring 
-mariadb-server mariadb-client openssh-server wget unzip
+echo -e "${YELLOW}Menginstal Apache2, PHP, MariaDB, phpMyAdmin, SSH, dan WordPress...${RESET}" echo -e "Harap tunggu..." apt install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring 
+mariadb-server mariadb-client openssh-server wget unzip | pv -lep -s 100 > /dev/null
 
 Konfigurasi otomatis phpMyAdmin
 
@@ -19,11 +23,11 @@ echo -e "${CYAN}Mengonfigurasi phpMyAdmin secara otomatis...${RESET}" echo -e "$
 
 Instal phpMyAdmin
 
-apt install -y phpmyadmin
+apt install -y phpmyadmin | pv -lep -s 100 > /dev/null
 
 Mengaktifkan dan memulai layanan
 
-echo -e "${CYAN}Mengaktifkan layanan...${RESET}" systemctl enable apache2 mariadb ssh systemctl start apache2 mariadb ssh
+echo -e "${CYAN}Mengaktifkan layanan...${RESET}" systemctl enable apache2 mariadb ssh | pv -lep -s 100 > /dev/null systemctl start apache2 mariadb ssh | pv -lep -s 100 > /dev/null
 
 Konfigurasi SSH agar root bisa login
 
@@ -39,7 +43,7 @@ echo -e "${CYAN}Mengonfigurasi MariaDB...${RESET}" mysql -e "CREATE DATABASE $wp
 
 Mengunduh dan memasang WordPress
 
-echo -e "${CYAN}Mengunduh dan memasang WordPress...${RESET}" cd /var/www/html wget https://wordpress.org/latest.tar.gz tar -xvzf latest.tar.gz rm latest.tar.gz
+echo -e "${CYAN}Mengunduh dan memasang WordPress...${RESET}" cd /var/www/html wget https://wordpress.org/latest.tar.gz | pv -lep -s 100 > /dev/null tar -xvzf latest.tar.gz | pv -lep -s 100 > /dev/null rm latest.tar.gz
 
 Mengatur izin direktori WordPress
 
@@ -51,7 +55,7 @@ cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-confi
 
 Mengatur bahasa WordPress ke Indonesia secara otomatis
 
-echo -e "${YELLOW}Mengatur bahasa WordPress ke Indonesia...${RESET}" wget -P /var/www/html/wordpress/wp-content/languages https://downloads.wordpress.org/translation/core/6.4/id_ID.zip unzip /var/www/html/wordpress/wp-content/languages/id_ID.zip -d /var/www/html/wordpress/wp-content/languages rm /var/www/html/wordpress/wp-content/languages/id_ID.zip chown -R www-data:www-data /var/www/html/wordpress/wp-content/languages
+echo -e "${YELLOW}Mengatur bahasa WordPress ke Indonesia...${RESET}" wget -P /var/www/html/wordpress/wp-content/languages https://downloads.wordpress.org/translation/core/6.4/id_ID.zip | pv -lep -s 100 > /dev/null unzip /var/www/html/wordpress/wp-content/languages/id_ID.zip -d /var/www/html/wordpress/wp-content/languages | pv -lep -s 100 > /dev/null rm /var/www/html/wordpress/wp-content/languages/id_ID.zip chown -R www-data:www-data /var/www/html/wordpress/wp-content/languages
 
 mysql -e "USE $wp_db; UPDATE wp_options SET option_value='id_ID' WHERE option_name='WPLANG';"
 
@@ -59,13 +63,13 @@ Menambahkan watermark unik
 
 echo -e "${CYAN}Menambahkan watermark...${RESET}" cat <<EOL >> /var/www/html/wordpress/wp-config.php
 
-/* === Watermark by makan bang === / / Skrip ini dibuat oleh makan bang */
+/* === Watermark by makan bang === / / Rajin sekolah tiap hari, / / Tapi ngantuk pas pelajaran. / / PR lupa belum dikerjain, / / Senyum aja biar aman! */
 
 EOL
 
 Merestart Apache untuk menerapkan perubahan
 
-echo -e "${YELLOW}Merestart Apache2...${RESET}" systemctl restart apache2
+echo -e "${YELLOW}Merestart Apache2...${RESET}" systemctl restart apache2 | pv -lep -s 100 > /dev/null
 
 Mendapatkan IP server
 
