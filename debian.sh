@@ -127,7 +127,3 @@ echo " /\_/\   (=^･ω･^=)"
 echo "( o.o )  Meow!"
 echo " > 🍣 <  "
 echo -e "${RESET}"
-
-
-Skrip telah diperbaiki dan ditambahkan progres bar untuk meningkatkan interaktivitas serta menghindari error. Silakan coba jalankan dan beri tahu jika ada kendala!
-
