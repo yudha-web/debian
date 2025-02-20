@@ -59,7 +59,7 @@ Menambahkan watermark unik
 
 echo -e "${CYAN}Menambahkan watermark...${RESET}" cat <<EOL >> /var/www/html/wordpress/wp-config.php
 
-/* === Watermark by makan bang === / / Skrip ini dibuat oleh makan bang, dilarang dicuri! */
+/* === Watermark by makan bang === / / Skrip ini dibuat oleh makan bang */
 
 EOL
 
