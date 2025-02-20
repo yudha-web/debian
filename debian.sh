@@ -4,18 +4,31 @@ Warna teks
 
 GREEN="\e[32m" YELLOW="\e[33m" CYAN="\e[36m" RESET="\e[0m"
 
+Fungsi untuk menampilkan progres bar
+
+progress_bar() { local duration=${1} local columns=$(tput cols) local progress=0 local increment=$((duration / columns))
+
+echo -ne "["
+for ((i = 0; i < columns; i++)); do
+    sleep 0.1
+    echo -ne "="
+done
+echo -e "] Done!"
+
+}
+
 Memperbarui sistem
 
-echo -e "${YELLOW}Memperbarui sistem...${RESET}" apt update -y && apt upgrade -y
+echo -e "${YELLOW}Memperbarui sistem...${RESET}" progress_bar 5 apt update -y && apt upgrade -y
 
 Menginstal paket yang diperlukan
 
-echo -e "${YELLOW}Menginstal Apache2, PHP, MariaDB, phpMyAdmin, SSH, dan WordPress...${RESET}" apt install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring 
+echo -e "${YELLOW}Menginstal Apache2, PHP, MariaDB, phpMyAdmin, SSH, dan WordPress...${RESET}" progress_bar 5 apt install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring 
 mariadb-server mariadb-client openssh-server wget unzip
 
 Konfigurasi otomatis phpMyAdmin
 
-echo -e "${CYAN}Mengonfigurasi phpMyAdmin secara otomatis...${RESET}" debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true" debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password root123" debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password root123"
+echo -e "${CYAN}Mengonfigurasi phpMyAdmin secara otomatis...${RESET}" progress_bar 3 debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true" debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password root123" debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password root123"
 
 Instal phpMyAdmin
 
@@ -23,11 +36,11 @@ apt install -y phpmyadmin
 
 Mengaktifkan dan memulai layanan
 
-echo -e "${CYAN}Mengaktifkan layanan...${RESET}" systemctl enable apache2 mariadb ssh systemctl start apache2 mariadb ssh
+echo -e "${CYAN}Mengaktifkan layanan...${RESET}" progress_bar 3 systemctl enable apache2 mariadb ssh systemctl start apache2 mariadb ssh
 
 Konfigurasi SSH agar root bisa login
 
-echo -e "${YELLOW}Mengaktifkan login root SSH...${RESET}" sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config systemctl restart ssh
+echo -e "${YELLOW}Mengaktifkan login root SSH...${RESET}" progress_bar 2 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config systemctl restart ssh
 
 Membuat database WordPress
 
@@ -35,35 +48,31 @@ echo -e "${YELLOW}Masukkan nama database untuk WordPress:${RESET}" read wp_db ec
 
 Konfigurasi MariaDB
 
-echo -e "${CYAN}Mengonfigurasi MariaDB...${RESET}" mysql -e "CREATE DATABASE $wp_db;" mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';" mysql -e "GRANT ALL PRIVILEGES ON $wp_db.* TO '$db_user'@'localhost';" mysql -e "FLUSH PRIVILEGES;"
+echo -e "${CYAN}Mengonfigurasi MariaDB...${RESET}" progress_bar 4 mysql -e "CREATE DATABASE $wp_db;" mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';" mysql -e "GRANT ALL PRIVILEGES ON $wp_db.* TO '$db_user'@'localhost';" mysql -e "FLUSH PRIVILEGES;"
 
 Mengunduh dan memasang WordPress
 
-echo -e "${CYAN}Mengunduh dan memasang WordPress...${RESET}" cd /var/www/html wget https://wordpress.org/latest.tar.gz tar -xvzf latest.tar.gz rm latest.tar.gz
+echo -e "${CYAN}Mengunduh dan memasang WordPress...${RESET}" progress_bar 5 cd /var/www/html wget https://wordpress.org/latest.tar.gz tar -xvzf latest.tar.gz rm latest.tar.gz
 
 Mengatur izin direktori WordPress
 
-echo -e "${YELLOW}Mengatur izin direktori WordPress...${RESET}" chown -R www-data:www-data /var/www/html/wordpress chmod -R 777 /var/www/html/wordpress
+echo -e "${YELLOW}Mengatur izin direktori WordPress...${RESET}" progress_bar 3 chown -R www-data:www-data /var/www/html/wordpress chmod -R 777 /var/www/html/wordpress
 
 Mengonfigurasi wp-config.php
 
 cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php sed -i "s/database_name_here/$wp_db/" /var/www/html/wordpress/wp-config.php sed -i "s/username_here/$db_user/" /var/www/html/wordpress/wp-config.php sed -i "s/password_here/$db_pass/" /var/www/html/wordpress/wp-config.php
 
-Mengatur bahasa WordPress ke Indonesia
-
-echo -e "${YELLOW}Menetapkan bahasa WordPress ke Indonesia...${RESET}" sed -i "s/define('WPLANG', '');/define('WPLANG', 'id_ID');/" /var/www/html/wordpress/wp-config.php
-
 Menambahkan watermark unik
 
-echo -e "${CYAN}Menambahkan watermark...${RESET}" cat <<EOL >> /var/www/html/wordpress/wp-config.php
+echo -e "${CYAN}Menambahkan watermark...${RESET}" progress_bar 2 cat <<EOL >> /var/www/html/wordpress/wp-config.php
 
-/* === Watermark by makan bang === / / Skrip ini dibuat oleh makan bang, dilarang dicuri! */
+/* === Watermark by makan bang === / / Sekolah rajin biar pintar, jangan lupa mampir makan bang! */
 
 EOL
 
 Merestart Apache untuk menerapkan perubahan
 
-echo -e "${YELLOW}Merestart Apache2...${RESET}" systemctl restart apache2
+echo -e "${YELLOW}Merestart Apache2...${RESET}" progress_bar 3 systemctl restart apache2
 
 Mendapatkan IP server
 
