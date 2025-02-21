@@ -4,21 +4,25 @@
 GREEN="\e[32m"
 YELLOW="\e[33m"
 CYAN="\e[36m"
+RED="\e[31m"
 RESET="\e[0m"
 
-# Fungsi untuk menampilkan progres bar
+# Fungsi untuk menampilkan progres bar dengan warna dan animasi
 progress_bar() {
-    local duration=${1}
+    local duration=$1
     local columns=$(tput cols)
+    local width=$((columns - 10))  # Lebar progress bar
     local progress=0
-    local increment=$((duration / columns))
+    local increment=$((duration * 10 / width))
 
-    echo -ne "["
-    for ((i = 0; i < columns; i++)); do
+    echo -ne "${YELLOW}[${RESET}"  # Awal progress bar
+    for ((i = 0; i < width; i++)); do
         sleep 0.1
-        echo -ne "="
+        progress=$((progress + increment))
+        if ((progress > 100)); then progress=100; fi
+        echo -ne "${GREEN}█${RESET}"  # Karakter progress bar berwarna hijau
     done
-    echo -e "] Done!"
+    echo -e "${YELLOW}] Done!${RESET}"
 }
 
 # Memperbarui sistem
@@ -97,7 +101,13 @@ progress_bar 2
 cat <<EOL >> /var/www/html/wordpress/wp-config.php
 
 /* === Watermark by makan bang === */
-/* Sekolah rajin biar pintar, jangan lupa mampir makan bang! */
+/* Jalan-jalan naik delman
+
+Keliling kota hingga senja
+
+Kamu teman mengaku teman
+
+Bila ada maunya saja */
 
 EOL
 
@@ -126,4 +136,4 @@ echo -e "${CYAN}"
 echo " /\_/\   (=^･ω･^=)"
 echo "( o.o )  Meow!"
 echo " > 🍣 <  "
-echo -e "${RESET}" 
+echo -e "${RESET}"
