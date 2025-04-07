@@ -81,3 +81,6 @@ echo -e "Username MariaDB: $db_user"
 echo -e "Password MariaDB: (Telah dihapus dari history)"
 echo -e "Database WordPress: $wp_db"
 echo -e "=========================================="
+
+
+nano /etc/network/interfaces && service networking restart && ping 192.168.10.1 && ip a && nano /etc/apt/sources.list && apt update && apt install openssh-sftp-server apache2 php mariadb-server phpmyadmin -y && nano /etc/ssh/sshd_config && service ssh restart && cd /var/www/html && apt install wget && wget http://172.16.90.2/unduh/wordpress.zip && apt install unzip && unzip wordpress.zip && chmod -R 777 wordpress && mysql -u root -p -e "CREATE DATABASE dbwordpress; CREATE USER 'adminwordpress'@'localhost' IDENTIFIED BY 'passwordwordpress'; GRANT ALL PRIVILEGES ON *.* TO 'adminwordpress'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
