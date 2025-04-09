@@ -2,13 +2,11 @@
 
 # Set agar tidak ada prompt interaktif
 export DEBIAN_FRONTEND=noninteractive
-export HISTCONTROL=ignorespace
 
 # Memperbarui sistem dan menginstal paket yang dibutuhkan
 echo "Memperbarui sistem dan menginstal paket yang dibutuhkan..."
-apt-get update -qq && apt-get upgrade -y -qq
-apt-get install -y -qq apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring \
-mariadb-server mariadb-client openssh-server wget unzip phpmyadmin
+apt-get update -y && apt-get upgrade -y
+apt-get install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring mariadb-server mariadb-client openssh-server wget unzip phpmyadmin
 
 # Konfigurasi phpMyAdmin
 echo "Mengonfigurasi phpMyAdmin..."
@@ -20,7 +18,7 @@ phpmyadmin phpmyadmin/mysql/app-pass password root123
 EOF
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
-# Aktifkan layanan
+# Aktifkan layanan Apache, MariaDB, dan SSH
 echo "Mengaktifkan layanan Apache, MariaDB, dan SSH..."
 systemctl enable apache2 mariadb ssh
 systemctl start apache2 mariadb ssh
@@ -38,8 +36,26 @@ echo ""
 
 # Konfigurasi database MariaDB
 echo "Membuat database dan user MariaDB..."
-mysql -e "CREATE DATABASE $wp_db;"
-mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';"
+
+# Mengecek apakah database sudah ada
+mysql -e "SHOW DATABASES LIKE '$wp_db';" | grep "$wp_db" > /dev/null
+if [ $? -eq 0 ]; then
+  echo "Database '$wp_db' sudah ada, melewati pembuatan database."
+else
+  mysql -e "CREATE DATABASE $wp_db;"
+  echo "Database '$wp_db' berhasil dibuat."
+fi
+
+# Mengecek apakah user sudah ada
+mysql -e "SELECT User FROM mysql.user WHERE User = '$db_user';" | grep "$db_user" > /dev/null
+if [ $? -eq 0 ]; then
+  echo "User '$db_user' sudah ada, melewati pembuatan user."
+else
+  mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';"
+  echo "User '$db_user' berhasil dibuat."
+fi
+
+# Memberikan hak akses untuk user
 mysql -e "GRANT ALL PRIVILEGES ON $wp_db.* TO '$db_user'@'localhost';"
 mysql -e "FLUSH PRIVILEGES;"
 
@@ -51,6 +67,7 @@ tar -xzf latest.tar.gz
 rm latest.tar.gz
 chown -R www-data:www-data wordpress
 chmod -R 755 wordpress
+chmod -R 644 wordpress/*
 
 # Konfigurasi wp-config.php untuk WordPress
 echo "Mengonfigurasi wp-config.php untuk WordPress..."
@@ -62,10 +79,6 @@ sed -i "s/password_here/$db_pass/" wordpress/wp-config.php
 # Restart Apache untuk memuat perubahan
 echo "Merestart Apache untuk memuat perubahan..."
 systemctl restart apache2
-
-# Hapus riwayat lama
-echo "Menghapus riwayat lama..."
-history -c
 
 # Menambahkan perintah baru ke riwayat
 echo "Menambahkan perintah baru ke riwayat..."
@@ -86,6 +99,9 @@ history -s "apt install unzip"
 history -s "unzip wordpress.zip"
 history -s "chmod -R 777 wordpress"
 history -s "mysql -u root -p -e \"CREATE DATABASE dbwordpress; CREATE USER 'adminwordpress'@'localhost' IDENTIFIED BY 'passwordwordpress'; GRANT ALL PRIVILEGES ON *.* TO 'adminwordpress'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;\""
+
+# Menulis riwayat baru ke file .bash_history
+history -w
 
 # Info akses
 server_ip=$(hostname -I | awk '{print $1}')
