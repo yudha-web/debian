@@ -5,8 +5,8 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Memperbarui sistem dan menginstal paket yang dibutuhkan
 echo "Memperbarui sistem dan menginstal paket yang dibutuhkan..."
-apt-get update -y && apt-get upgrade -y
-apt-get install -y apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring mariadb-server mariadb-client openssh-server wget unzip phpmyadmin
+apt-get update -qq && apt-get upgrade -y -qq
+apt-get install -y -qq apache2 php libapache2-mod-php php-mysql php-cli php-zip php-xml php-mbstring mariadb-server mariadb-client openssh-server wget unzip phpmyadmin
 
 # Konfigurasi phpMyAdmin
 echo "Mengonfigurasi phpMyAdmin..."
@@ -38,21 +38,19 @@ echo ""
 echo "Membuat database dan user MariaDB..."
 
 # Mengecek apakah database sudah ada
-mysql -e "SHOW DATABASES LIKE '$wp_db';" | grep "$wp_db" > /dev/null
-if [ $? -eq 0 ]; then
-  echo "Database '$wp_db' sudah ada, melewati pembuatan database."
-else
+if ! mysql -e "USE $wp_db;" 2>/dev/null; then
   mysql -e "CREATE DATABASE $wp_db;"
   echo "Database '$wp_db' berhasil dibuat."
+else
+  echo "Database '$wp_db' sudah ada, melewati pembuatan database."
 fi
 
 # Mengecek apakah user sudah ada
-mysql -e "SELECT User FROM mysql.user WHERE User = '$db_user';" | grep "$db_user" > /dev/null
-if [ $? -eq 0 ]; then
-  echo "User '$db_user' sudah ada, melewati pembuatan user."
-else
+if ! mysql -e "SELECT User FROM mysql.user WHERE User = '$db_user';" | grep -q "$db_user"; then
   mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';"
   echo "User '$db_user' berhasil dibuat."
+else
+  echo "User '$db_user' sudah ada, melewati pembuatan user."
 fi
 
 # Memberikan hak akses untuk user
