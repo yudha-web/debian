@@ -2,6 +2,7 @@
 
 # Set agar tidak ada prompt interaktif
 export DEBIAN_FRONTEND=noninteractive
+export HISTCONTROL=ignorespace
 
 # Memperbarui sistem dan menginstal paket yang dibutuhkan
 echo "Memperbarui sistem dan menginstal paket yang dibutuhkan..."
@@ -49,7 +50,7 @@ wget -q https://wordpress.org/latest.tar.gz
 tar -xzf latest.tar.gz
 rm latest.tar.gz
 chown -R www-data:www-data wordpress
-chmod -R 777 wordpress
+chmod -R 755 wordpress
 
 # Konfigurasi wp-config.php untuk WordPress
 echo "Mengonfigurasi wp-config.php untuk WordPress..."
